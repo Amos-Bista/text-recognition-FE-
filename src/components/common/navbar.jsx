@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { HiMenuAlt3, HiMenuAlt1 } from "react-icons/hi";
 import ResponsiveMenu, { Navlinks } from "./responsivemenu";
 import { useTheme } from "../../App"; // Correctly import the useTheme hook
+import { BiSolidMoon, BiSolidSun } from "react-icons/bi";
 
 const Navbar = () => {
   const { theme, setTheme } = useTheme(); // Destructure theme and setTheme

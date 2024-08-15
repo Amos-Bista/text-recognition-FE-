@@ -14,8 +14,8 @@ export const Navlinks = [
   },
   {
     id: 1,
-    name: "ABOUT",
-    link: "/about",
+    name: "VIDEO",
+    link: "/video",
   },
   {
     id: 1,
@@ -54,7 +54,14 @@ const ResponsiveMenu = ({ showMenu }) => {
       </div>
       <div className="footer">
         <h1>
-          Made with ❤ by <a href="https://dilshad-ahmed.github.io/">Dilshad</a>{" "}
+          Made with by{" "}
+          <a
+            href="https://github.com/Amos-Bista/text-recognition-FE-"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Amos
+          </a>{" "}
         </h1>
       </div>
     </div>

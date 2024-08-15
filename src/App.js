@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/common/navbar";
-import Home from "./pages/home";
+import Home from "./pages/video";
 import UploadForm from "./pages/uploadImage";
 import SignInForm from "./pages/signin";
+import About from "./pages/home";
+import Video from "./pages/video";
 // import LoginForm from "./components/common/siginForm";
 
 const ThemeContext = createContext();
@@ -36,9 +38,10 @@ function App() {
       >
         <Navbar useTheme={useTheme} />
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<About />} />
           <Route path="/upload" element={<UploadForm />} />
           <Route path="/sigin" element={<SignInForm />} />
+          <Route path="/video" element={<Video/>} />
         </Routes>
       </div>
     </Router>
