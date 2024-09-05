@@ -25,13 +25,13 @@ const Navbar = () => {
 
   return (
     <div
-      className={`relative z-10 flex justify-center w-full duration-300 shadow-md ${themeStyles[theme]}`}
+      className={`relative z-10 flex justify-center w-full duration-300 shadow-md ${themeStyles[theme]} px-8`}
     >
       <div className="container py-2 md:py-0 md:px-12 sm:px-6">
         <div className="flex items-center justify-between">
           <div>
             <span className="font-serif text-xl font-bold sm:text-xl md:text-3xl lg:text-4xl xl:text-5xl">
-              Text Decator
+              Text Detector
             </span>
           </div>
           <nav className="hidden md:block">

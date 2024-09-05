@@ -3,23 +3,24 @@
 @tailwind utilities;
 
 body {
+  font-family: "Rhode", sans-serif;
   margin: 0;
-  overflow: hidden; /* Prevents scrollbars */
+  /* Prevents scrollbars */
 }
 
 .zoom-background {
-    background-image: url('/public/signin.jpeg'); /* Replace with your actual image URL */
-    background-size: cover;
-    background-position: center;
-    animation: zoom 1s infinite alternate; /* Slow zoom-in effect */
+  /* background-image: url("/public/signin.jpeg"); Replace with your actual image URL */
+  background-size: cover;
+  background-position: center;
+  animation: zoom 1s infinite alternate; /* Slow zoom-in effect */
+  overflow: hidden;
+}
+
+@keyframes zoom {
+  0% {
+    transform: scale(1); /* Initial scale */
   }
-  
-  @keyframes zoom {
-    0% {
-      transform: scale(1); /* Initial scale */
-    }
-    100% {
-      transform: scale(1.1); /* Final scale (zoomed in) */
-    }
+  100% {
+    transform: scale(1.1); /* Final scale (zoomed in) */
   }
-  
+}
