@@ -4,7 +4,7 @@ import HeroLanding from "../components/home/hero";
 
 const Home = () => {
   return (
-    <div>
+    <div className="bg-black">
       <HeroLanding/>
    </div>
   );
