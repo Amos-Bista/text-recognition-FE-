@@ -3,8 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/common/navbar";
 import SignInForm from "./pages/signin";
 import About from "./pages/home";
-import Video from "./pages/video";
 import UploadPages from "./pages/upload";
+import Chat from "./pages/chat";
 // import LoginForm from "./components/common/siginForm";
 
 const ThemeContext = createContext();
@@ -40,7 +40,7 @@ function App() {
           <Route path="/" element={<About />} />
           <Route path="/upload" element={<UploadPages />} />
           <Route path="/sigin" element={<SignInForm />} />
-          <Route path="/video" element={<Video />} />
+          <Route path="/chat" element={<Chat />} />
         </Routes>
       </div>
     </Router>
