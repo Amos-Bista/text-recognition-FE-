@@ -25,7 +25,7 @@ const Navbar = () => {
 
   return (
     <div
-      className={`relative z-10 flex justify-center w-full duration-300 shadow-md ${themeStyles[theme]} px-8`}
+      className={`relative z-10 flex justify-center w-full duration-300  ${themeStyles[theme]} px-8`}
     >
       <div className="container py-2 md:py-0 md:px-12 sm:px-6">
         <div className="flex items-center justify-between">
