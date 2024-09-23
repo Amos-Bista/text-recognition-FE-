@@ -29,6 +29,20 @@ const UploadForm = () => {
     document.getElementById("file-input")?.click();
   };
 
+  const handleClearConvertedTexts = () => {
+    axios
+      .delete("http://127.0.0.1:5000/api/clear-texts")
+      .then((response) => {
+        setConvertedTexts([]); // Clear texts in the frontend state
+      })
+      .catch((error) => {
+        console.error(
+          "Clear texts failed:",
+          error.response ? error.response.data : error.message
+        ); // Log detailed error
+      });
+  };
+
   const handleConvertFilesClick = () => {
     if (selectedFiles.length === 0) {
       toast.error("Please select files before converting.");
@@ -41,6 +55,7 @@ const UploadForm = () => {
     selectedFiles.forEach((file) => {
       formData.append("file", file); // Append files to formData
     });
+    handleClearConvertedTexts();
 
     axios
       .post("http://127.0.0.1:5000/api/convert-image", formData, {
@@ -53,7 +68,7 @@ const UploadForm = () => {
       })
       .then((response) => {
         console.log("Converted texts response data:", response.data); // Log the response
-        setConvertedTexts(response.data.texts || []); // Update state with all texts
+        setConvertedTexts(response.data.texts); // Update state with all texts
         setLoading(false); // Stop loading
         toast.success("Conversion successful!"); // Show success toast
       })
@@ -80,9 +95,7 @@ const UploadForm = () => {
           children: convertedTexts.map(
             (textObj) =>
               new docx.Paragraph({
-                children: [
-                  new docx.TextRun(textObj.text || "No text available"),
-                ],
+                children: [new docx.TextRun(textObj || "No text available")],
               })
           ),
         },
@@ -100,6 +113,7 @@ const UploadForm = () => {
 
   const handleClearFiles = () => {
     setSelectedFiles([]); // Clear selected files
+    handleClearConvertedTexts();
   };
 
   return (
@@ -255,17 +269,16 @@ const UploadForm = () => {
           >
             {showText ? "Hide Text" : "View Text"}
           </Button>
-          <Button
+          {/* <Button
             color="secondary"
             fullWidth
             sx={{ mt: { xs: 2, sm: 0 }, ml: { sm: 2 } }}
             // onClick={() => setSelectedFiles([])}
             onClick={handleDownloadWord}
-
-            // disabled={loading}
+            disabled={loading}
           >
             Download Word
-          </Button>
+          </Button> */}
         </Box>
 
         {showText && (
@@ -281,12 +294,22 @@ const UploadForm = () => {
           >
             <Typography variant="h6">Converted Texts:</Typography>
             {convertedTexts.length > 0 ? (
-              convertedTexts.map((textObj, index) => (
-                <Typography key={index} variant="body2" sx={{ marginTop: 1 }}>
-                  {textObj.text || "No text available"}{" "}
-                  {/* Ensure this is a string */}
-                </Typography>
-              ))
+              <>
+                {convertedTexts.map((textObj, index) => (
+                  <Typography key={index} variant="body2" sx={{ marginTop: 1 }}>
+                    {textObj}
+                  </Typography>
+                ))}
+                <Button
+                  color="secondary"
+                  fullWidth
+                  sx={{ mt: 2 }}
+                  onClick={handleDownloadWord}
+                  disabled={loading}
+                >
+                  Download Word
+                </Button>
+              </>
             ) : (
               <Typography variant="body2" color="textSecondary">
                 No texts available
