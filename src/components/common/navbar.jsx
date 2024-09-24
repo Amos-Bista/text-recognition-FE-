@@ -30,9 +30,12 @@ const Navbar = () => {
       <div className="container py-2 md:py-0 md:px-12 sm:px-6">
         <div className="flex items-center justify-between">
           <div>
-            <span className="font-serif text-xl font-bold sm:text-xl md:text-3xl lg:text-4xl xl:text-5xl">
+            <a
+              href="/"
+              className="font-serif text-xl font-bold sm:text-xl md:text-3xl lg:text-4xl xl:text-5xl"
+            >
               Text Detector
-            </span>
+            </a>
           </div>
           <nav className="hidden md:block">
             <ul className="flex items-center gap-8">

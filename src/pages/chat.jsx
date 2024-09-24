@@ -6,7 +6,7 @@ import SidebarSection from "../components/chat/sidebar-Section";
 import ChatSection from "../components/chat/chat-Section";
 
 function Chat() {
-  const [isOpen, setIsOpen] = useState(true); // State to manage sidebar visibility
+  const [isOpen, setIsOpen] = useState(false); // State to manage sidebar visibility
 
   const toggleSidebar = () => {
     setIsOpen((prev) => !prev); // Toggle sidebar state

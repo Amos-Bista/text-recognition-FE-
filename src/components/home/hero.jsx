@@ -4,9 +4,11 @@ import { Box, Button } from "@mui/material";
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // Import the carousel styles
 import "../../index.css"; // Assuming zoom effect is defined here
+import { useNavigate } from "react-router-dom";
 
 const HeroLanding = () => {
   const el = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const typed = new Typed(el.current, {
@@ -24,6 +26,10 @@ const HeroLanding = () => {
       typed.destroy();
     };
   }, []);
+
+  const handleLearn = () => {
+    navigate("/chat");
+  };
 
   return (
     <div className="relative h-screen px-10 bg-black lg:px-24">
@@ -65,6 +71,7 @@ const HeroLanding = () => {
         </div>
         <Button
           variant="contained"
+          onClick={handleLearn}
           sx={{
             marginTop: "2rem",
             height: "4rem",
