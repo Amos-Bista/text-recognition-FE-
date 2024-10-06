@@ -1,7 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Stack, Typography, CircularProgress, Box, Grid } from "@mui/material"; // Import CircularProgress
-import Button from "@mui/material/Button";
-import axios from "axios";
+import React, { useState } from "react";
+import { Box, Grid } from "@mui/material";
 import SidebarSection from "../components/chat/sidebar-Section";
 import ChatSection from "../components/chat/chat-Section";
 
@@ -11,23 +9,30 @@ function Chat() {
   const toggleSidebar = () => {
     setIsOpen((prev) => !prev); // Toggle sidebar state
   };
+
   return (
-    <Box sx={{ height: "94vh", backgroundColor: "red" }}>
+    <Box sx={{ height: "90vh" }}>
       <Grid container>
         <Grid
           item
-          xs={isOpen ? 2 : 0.32}
+          xs={isOpen ? 2 : 0.5} // Change width based on isOpen state
           sx={{
-            transition: "width 3s ease-in-out",
-            backgroundColor: "071952",
+            transition: "width 9s ease-out", // Smooth transition for width
+            backgroundColor: "#071952", // Fixed the hex color format
+            overflow: "hidden", // Prevent overflow during transition
+            width: isOpen ? "200px" : "40px", // Use fixed width values for smoother effect
           }}
         >
           <SidebarSection isOpen={isOpen} toggleSidebar={toggleSidebar} />
         </Grid>
         <Grid
           item
-          xs={isOpen ? 10 : 11.68}
-          sx={{ transition: "width 3s ease-in-out" }}
+          xs={isOpen ? 10 : 11.5} // Adjust based on sidebar state
+          sx={{
+            transition: "width 9s ease-in", // Keep it consistent with the sidebar
+            overflow: "hidden", // Prevent overflow during transition
+            width: isOpen ? "200px" : "40px", // Use fixed width values for smoother effect
+          }}
         >
           <ChatSection />
         </Grid>
