@@ -16,12 +16,15 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import * as docx from "docx";
 import { saveAs } from "file-saver"; // Import file-saver to save files
+import ConvertedTextSection from "./convertedTextSection";
+import { TbFileUpload } from "react-icons/tb";
+import { Scale } from "@mui/icons-material";
 
 const ChatSection = () => {
   const [messages, setMessages] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]); // Changed to an array
   const [imagePreviews, setImagePreviews] = useState([]);
-  const [convertedTexts, setConvertedTexts] = useState("amos");
+  const [convertedTexts, setConvertedTexts] = useState();
   const [loading, setLoading] = useState(false);
   const { theme } = useTheme();
   const [copiedText, setCopiedText] = useState([]);
@@ -33,6 +36,7 @@ const ChatSection = () => {
   };
   const upload = () => {
     setConvertedTexts([]);
+    handleConvertFilesClick();
   };
 
   const handleImageUpload = (event) => {
@@ -52,7 +56,7 @@ const ChatSection = () => {
 
   const themeStyles = {
     light: {
-      backgroundColor: "linear-gradient(135deg, #ffffff, #f4f4f4)",
+      backgroundColor: "linear-gradient(135deg, #ffffff, #6482AD)",
       color: "#000",
     },
     dark: {
@@ -60,6 +64,28 @@ const ChatSection = () => {
       color: "#fff",
     },
   };
+
+  const themeStyles1 = {
+    light: {
+      backgroundColor: "linear-gradient(135deg, #5982AD, #6482AD)",
+      color: "#000",
+    },
+    dark: {
+      backgroundColor: "linear-gradient(135deg, #1F3045, #2B3C52)",
+      color: "#fff",
+    },
+  };
+  const themeStyles2 = {
+    light: {
+      backgroundColor: "linear-gradient(135deg, #ffffff, #6482AD)",
+      color: "#000",
+    },
+    dark: {
+      backgroundColor: "linear-gradient(135deg, #3B4D87, #6482AD)",
+      color: "#fff",
+    },
+  };
+
   const handleClearConvertedTexts = () => {
     axios
       .delete("http://127.0.0.1:5000/api/clear-texts")
@@ -122,19 +148,39 @@ const ChatSection = () => {
       sections: [
         {
           properties: {},
-          children: convertedTexts.map(
-            (textObj) =>
-              new docx.Paragraph({
-                children: [new docx.TextRun(textObj || "No text available")],
-              })
-          ),
+          children: convertedTexts.flatMap((textObj) => {
+            // Split the text into paragraphs and create a TextRun for each
+            return textObj
+              .split("\n") // Split text into lines based on newline characters
+              .filter((line) => line.trim() !== "") // Ignore empty lines
+              .map(
+                (line) =>
+                  new docx.Paragraph({
+                    children: [new docx.TextRun(line || "No text available")],
+                    alignment: docx.AlignmentType.LEFT, // Set the alignment here
+                  })
+              );
+          }),
         },
       ],
     });
 
+    // Generate and download the Word document
     docx.Packer.toBlob(doc).then((blob) => {
-      saveAs(blob, "converted-texts.docx");
+      saveAs(blob, "converted_texts.docx");
     });
+  };
+  const handleCopy = (index) => {
+    navigator.clipboard
+      .writeText(convertedTexts[index])
+      .then(() => {
+        setCopiedText(convertedTexts[index]); // Update state with copied text
+        toast.success("Text Copied To Clipboard"); // Show success toast
+      })
+      .catch((error) => {
+        toast.success("Text Copied To Clipboard"); // Show success toast
+        console.error("Copy failed:", error);
+      });
   };
 
   return (
@@ -148,22 +194,23 @@ const ChatSection = () => {
         color: themeStyles[theme].color,
       }}
     >
-      <Paper
+      <Box
         sx={{
           flex: 1,
-          overflowY: "auto",
           mb: 2,
           padding: 2,
           background: themeStyles[theme].backgroundColor,
           color: themeStyles[theme].color,
+          width: "100%",
+          overflowY: "auto", // Ensures overflow is handled within the Paper
         }}
       >
-        <List>
-          {/* {messages.map((msg, index) => (
-            <ListItem key={index}>
-              <ListItemText primary={msg} />
-            </ListItem>
-          ))} */}
+        <List
+          sx={{
+            overflowY: "auto", // Enables scrolling for the list content
+            maxHeight: "34rem", // Ensures the List height is restricted to the Paper's height
+          }}
+        >
           {imagePreviews.map((src, index) => (
             <ListItem
               key={`image-${index}`}
@@ -178,113 +225,218 @@ const ChatSection = () => {
                 sx={{
                   width: "100%",
                   display: "flex",
+                  flexDirection: "column",
                   justifyContent: "right",
                   padding: "2rem",
                 }}
               >
                 <Box
                   sx={{
-                    padding: "2rem",
-                    background: themeStyles[theme].backgroundColor,
-                    color: themeStyles[theme].color,
-                    borderRadius: "2rem",
-                    display: "flex", // Added to contain the Avatar
-                    justifyContent: "center", // Center Avatar
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "right",
                   }}
                 >
-                  <Avatar
-                    variant="rounded"
-                    src={src}
-                    alt={`Uploaded image ${index + 1}`}
+                  <Box
                     sx={{
-                      width: 680,
-                      height: 190,
+                      height: "4rem",
+                      width: "10rem",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      borderRadius: "12rem",
+                      background: themeStyles1[theme].backgroundColor,
+                      color: themeStyles[theme].color,
                     }}
-                  />
+                  >
+                    <Typography variant="body2">Your Image</Typography>
+                  </Box>
                 </Box>
-              </Box>
-              <Box sx={{ width: "100%" }}>
                 <Box
                   sx={{
-                    width: "50rem",
-                    padding: "2rem",
-                    background: themeStyles[theme].backgroundColor,
-                    color: themeStyles[theme].color,
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "right",
                   }}
                 >
-                  {convertedTexts[index] && ( // Check if there's converted text for this image
-                    <Typography variant="body2" sx={{ marginTop: 1 }}>
-                      {convertedTexts[index]} {/* Display converted text */}
-                    </Typography>
-                  )}
-
-                  {convertedTexts.length > 0 && ( // Corrected condition to check length of convertedTexts
+                  <Box
+                    sx={{
+                      paddingX: "1.5rem",
+                      background: themeStyles1[theme].backgroundColor,
+                      color: themeStyles[theme].color,
+                      borderRadius: "2rem",
+                      display: "flex",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Avatar
+                      variant="rounded"
+                      src={src}
+                      alt={`Uploaded image ${index + 1}`}
+                      sx={{
+                        width: "100%",
+                        maxWidth: 480,
+                        height: "auto",
+                        maxHeight: 490,
+                        "@media (max-width: 600px)": {
+                          width: "90%",
+                        },
+                      }}
+                    />
+                  </Box>
+                </Box>
+              </Box>
+              {convertedTexts.length > 0 && (
+                <Box sx={{ width: "100%" }}>
+                  <Box
+                    sx={{
+                      width: "72rem",
+                      paddingTop: "0",
+                      overflow: "hidden",
+                      borderRadius: "1rem",
+                      background: themeStyles1[theme].backgroundColor,
+                      color: themeStyles1[theme].color,
+                    }}
+                  >
                     <Box
                       sx={{
                         display: "flex",
-                        justifyContent: "start",
-                        gap: "2rem",
+                        alignItems: "center",
+                        paddingX: "2rem",
+                        justifyContent: "space-between",
+                        background: themeStyles2[theme].backgroundColor,
+                        color: themeStyles1[theme].color,
                       }}
                     >
-                      <Button
-                        color="secondary"
-                        fullWidth
-                        sx={{ mt: 2 }}
-                        onClick={handleDownloadWord}
-                        disabled={loading}
-                      >
-                        Download Word
-                      </Button>
-                      <Button
-                        color="secondary"
-                        onClick={() => {
-                          navigator.clipboard.writeText(convertedTexts[index]);
-                          setCopiedText(convertedTexts[index]);
+                      <Box>
+                        <Typography>Converted Text</Typography>
+                      </Box>
+                      <Box>
+                        {convertedTexts.length > 0 && (
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "start",
+                              gap: "2rem",
+                            }}
+                          >
+                            <Button
+                              color="primary"
+                              fullWidth
+                              onClick={handleDownloadWord}
+                              disabled={loading}
+                            >
+                              Download Word
+                            </Button>
+                            <Button
+                              color="secondary"
+                              onClick={() => handleCopy(index)}
+                            >
+                              Copy
+                            </Button>
+                          </Box>
+                        )}
+                      </Box>
+                    </Box>
+                    {convertedTexts[index] && (
+                      <Box
+                        sx={{
+                          paddingX: "2rem",
+                          paddingY: "2rem",
+                          background: themeStyles1[theme].backgroundColor,
                         }}
                       >
-                        Copy
-                      </Button>
-                    </Box>
-                  )}
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            marginTop: 1,
+                            color: themeStyles2[theme].color,
+                          }}
+                        >
+                          {convertedTexts[index]
+                            .split("\n")
+                            .filter((line) => line.trim() !== "")
+                            .map((line, idx) => (
+                              <p key={idx}>{line}</p>
+                            ))}
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
                 </Box>
-              </Box>
+              )}
             </ListItem>
           ))}
         </List>
-      </Paper>
+      </Box>
 
-      <Box sx={{ display: "flex", gap: 1 }}>
-        <TextField
-          variant="outlined"
-          fullWidth
-          value={convertedTexts}
-          placeholder="Type a message..."
-          onChange={(e) => setMessages((prev) => [...prev, e.target.value])}
-          onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+      <Box sx={{ display: "flex", justifyContent: "center" }}>
+        <Box
           sx={{
-            background: themeStyles[theme].backgroundColor,
-            color: themeStyles[theme].color,
+            display: "flex",
+            gap: 1,
+            padding: "1rem",
+            paddingX: "4rem",
+            borderRadius: "1rem",
+            border: "1px solid #071952 ",
+            width: "70rem",
+            alignItems: "center",
           }}
-        />
-        <input
-          accept="image/*"
-          type="file"
-          style={{ display: "none" }}
-          id="image-upload"
-          multiple // Allow multiple image uploads
-          onChange={handleImageUpload}
-        />
-        <label htmlFor="image-upload" onClick={upload}>
-          <Button variant="contained" component="span">
-            Upload Image
+        >
+          <label htmlFor="image-upload" onClick={upload}>
+            <TbFileUpload
+              size={50}
+              sx={{
+                color: "white", // Set text color to white
+                transition: "transform 0.3s ease", // Smooth transition for the scaling effect
+                "&:hover": {
+                  transform: "scale(1.05)", // Scale up to 105% on hover
+                },
+              }}
+              onClick={upload}
+            />
+          </label>
+          <TextField
+            variant="outlined"
+            fullWidth
+            value={convertedTexts}
+            placeholder="Type a message..."
+            onChange={(e) => setMessages((prev) => [...prev, e.target.value])}
+            onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+            InputProps={{
+              sx: {
+                border: "none", // Remove border
+                backgroundColor: "transparent", // Transparent background
+                color: themeStyles[theme].color, // Custom text color from themeStyles
+                // Additional styles
+                "&:focus": {
+                  border: "none", // Remove border on focus
+                  backgroundColor: "transparent", // Keep transparent background on focus
+                },
+              },
+            }}
+          />
+          <input
+            accept="image/*"
+            type="file"
+            style={{ display: "none" }}
+            id="image-upload"
+            multiple // Allow multiple image uploads
+            onChange={handleImageUpload}
+          />
+          <label htmlFor="image-upload" onClick={upload}>
+            <Button variant="contained" component="span">
+              Upload Image
+            </Button>
+          </label>
+          <Button variant="contained" onClick={handleConvertFilesClick}>
+            Convert and Send
           </Button>
-        </label>
-        <Button variant="contained" onClick={handleConvertFilesClick}>
-          Convert and Send
-        </Button>
-        <Button variant="outlined" onClick={handleClearImages}>
-          Clear Images
-        </Button>
+
+          <Button variant="outlined" onClick={handleClearImages}>
+            Clear Images
+          </Button>
+        </Box>
       </Box>
     </Box>
   );
