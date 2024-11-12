@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Button, Paper, Typography, Box, Grid } from "@mui/material";
-import { useTheme } from "../../App"; // Import the useTheme hook
 import axios from "axios"; // Import Axios for making HTTP requests
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -10,7 +9,6 @@ import * as docx from "docx";
 import { saveAs } from "file-saver"; // Import file-saver to save files
 
 const UploadForm = () => {
-  const { theme } = useTheme(); // Access the current theme
   const [selectedFiles, setSelectedFiles] = useState([]); // Initialize as an array
   const [loading, setLoading] = useState(false); // Loading state
   const [convertedTexts, setConvertedTexts] = useState([]); // Store converted texts
@@ -117,18 +115,20 @@ const UploadForm = () => {
   };
 
   return (
-    <Box>
+    <Box sx={{ backgroundColor: "black", padding: "2rem" }}>
       <Paper
-        elevation={3}
+        elevation={10}
         sx={{
           padding: 2,
-          maxWidth: "600px",
+          minWidth: "40rem",
+          maxWidth: "60rem",
+          // height: "20rem",
           margin: "0 auto",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          backgroundColor: theme === "dark" ? "#1f2937" : "#f3f4f6",
-          color: theme === "dark" ? "#fff" : "#000",
+          backgroundColor: "#1f2937",
+          color: "#fff",
         }}
       >
         <Typography variant="h5" gutterBottom>
@@ -143,7 +143,7 @@ const UploadForm = () => {
             borderRadius: "4px",
             marginBottom: 2,
             width: "100%",
-            color: theme === "dark" ? "#fff" : "#000",
+            color: "#fff",
           }}
         >
           <Typography variant="body1">Drop your files here!</Typography>
@@ -207,12 +207,6 @@ const UploadForm = () => {
                 sx={{
                   display: "flex",
                   justifyContent: "center",
-                  borderRadius: "4px",
-                  overflow: "hidden",
-                  backgroundColor: theme === "dark" ? "#2d3748" : "#fff",
-                  boxShadow: theme === "dark" ? 0 : 1,
-                  border:
-                    theme === "dark" ? "1px solid #444" : "1px solid #ccc",
                 }}
               >
                 <img
@@ -287,8 +281,8 @@ const UploadForm = () => {
               marginTop: 3,
               padding: 2,
               width: "100%",
-              backgroundColor: theme === "dark" ? "#1f2937" : "#f3f4f6",
-              color: theme === "dark" ? "#fff" : "#000",
+              backgroundColor: "#1f2937",
+              color: "#fff",
               borderRadius: "4px",
             }}
           >

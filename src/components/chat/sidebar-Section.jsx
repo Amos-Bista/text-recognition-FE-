@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Box,
   Button,
@@ -7,13 +7,10 @@ import {
   ListItem,
   ListItemText,
 } from "@mui/material";
-import { useTheme } from "../../App"; // Adjust the import path
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 
 const SidebarSection = ({ isOpen, toggleSidebar }) => {
-  const { theme } = useTheme(); // Get the current theme
-
   const themeStyles = {
     light: {
       backgroundColor: "#6482AD",
@@ -28,19 +25,19 @@ const SidebarSection = ({ isOpen, toggleSidebar }) => {
   return (
     <Box
       sx={{
-        height: "91.5vh", // Combine both heights
-        width: isOpen ? "20rem" : "10rem", // Adjust the expanded width
+        height: "91.5vh",
+        width: isOpen ? "20rem" : "10rem",
         overflow: "hidden",
         transition: "width 0.3s ease-in-out",
-        ...themeStyles[theme],
+        ...themeStyles,
       }}
     >
       <Button
         onClick={toggleSidebar}
         sx={{
-          color: themeStyles[theme].color,
+          color: themeStyles.color,
           display: "flex",
-          alignItems: "center",
+          alignItems: "right",
         }}
       >
         {isOpen ? <CloseIcon /> : <MenuIcon />}
@@ -59,20 +56,6 @@ const SidebarSection = ({ isOpen, toggleSidebar }) => {
           </ListItem>
         </List>
       </Box>
-      {!isOpen && (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100%",
-          }}
-        >
-          <Typography variant="caption" color="white">
-            Open Sidebar
-          </Typography>
-        </Box>
-      )}
     </Box>
   );
 };

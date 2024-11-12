@@ -1,70 +1,109 @@
 import React from "react";
-import { FaUserCircle } from "react-icons/fa";
-
-export const Navlinks = [
+import { Box, Stack, Typography } from "@mui/material";
+import { AiFillHome } from "react-icons/ai";
+import { FaUser } from "react-icons/fa";
+import { MdDesignServices, MdSettings } from "react-icons/md";
+import { TbFileReport } from "react-icons/tb";
+export const SidebarData = [
   {
-    id: 1,
-    name: "HOME",
-    link: "/#",
+    title: "Dashboard",
+    path: "/",
+    icon: <AiFillHome size={20} />,
   },
   {
-    id: 2,
-    name: "UPLOAD",
-    link: "/upload",
+    title: "Upload",
+    path: "/upload",
+    icon: <FaUser size={19} />,
   },
   {
-    id: 1,
-    name: "Chat",
-    link: "/chat",
+    title: "Chat",
+    path: "/chat",
+    icon: <MdDesignServices size={19} />,
+    subItems: [
+      { title: "General Chat", path: "/chat/general" },
+      { title: "Project Chat", path: "/chat/project" },
+    ],
   },
   {
-    id: 1,
-    name: "SIGIN",
-    link: "/sigin",
+    title: "SignIn",
+    path: "/signin",
+    icon: <TbFileReport size={20} />,
+  },
+  {
+    title: "Settings",
+    path: "/admin/setting",
+    icon: <MdSettings size={20} />,
   },
 ];
 
 const ResponsiveMenu = ({ showMenu }) => {
-  console.log("showMenu", showMenu);
   return (
-    <div
-      className={`${
-        showMenu ? "left-0" : "-left-[100%]"
-      } fixed bottom-0 top-0 flex h-screen w-[75%] flex-col justify-between bg-white dark:bg-gray-900 dark:text-white px-8 pb-6 pt-16 text-black transition-all duration-200 md:hidden rounded-r-xl shadow-md z-40`}
+    <Box
+      sx={{
+        position: "fixed",
+        left: 0,
+        top: 0,
+        bottom: 0,
+        width: showMenu ? "220px" : "80px",
+        backgroundColor: "#1A1F1F",
+        color: "#B4B9BF",
+        transition: "width 0.3s ease",
+        zIndex: 1000,
+        padding: "1rem",
+        overflow: "hidden",
+        "&:hover": {
+          width: "250px",
+        },
+      }}
     >
-      <div className="card">
-        <div className="flex items-center justify-start gap-3">
-          <FaUserCircle size={50} />
-          <div>
-            <h1>Hello User</h1>
-            <h1 className="text-sm text-slate-500">Premium user</h1>
-          </div>
-        </div>
-        <nav className="mt-12">
-          <ul className="space-y-4 text-xl">
-            {Navlinks.map((data) => (
-              <li>
-                <a href={data.link} className="inline-block mb-5">
-                  {data.name}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </div>
-      <div className="footer">
-        <h1>
-          Made with by{" "}
-          <a
-            href="https://github.com/Amos-Bista/text-recognition-FE-"
-            target="_blank"
-            rel="noopener noreferrer"
+      <Stack mt={4}>
+        {SidebarData.map((item, index) => (
+          <Box
+            key={index}
+            component="a"
+            href={item.path}
+            sx={{
+              // marginX: "1.5rem",
+              paddingY: "0.6rem",
+              paddingLeft: "0.9rem",
+              width: "10.5rem",
+              borderRadius: "0.6rem",
+              display: "flex",
+              gap: "1.6rem",
+              color: "#B4B9BF",
+              transition: "background-color 0.3s, color 0.3s",
+              "&:hover": {
+                backgroundColor: "#182637",
+                color: "skyblue",
+                transform: "scale(1.06)",
+              },
+              cursor: "pointer",
+            }}
           >
-            Amos
-          </a>{" "}
-        </h1>
-      </div>
-    </div>
+            <Box
+              sx={{
+                minWidth: "24px",
+                minHeight: "24px",
+                display: "flex",
+                gap: "2rem",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {item.icon}
+            </Box>
+            <Typography
+              sx={{
+                fontSize: "18px",
+                transition: "opacity 0.3s",
+              }}
+            >
+              {item.title}
+            </Typography>
+          </Box>
+        ))}
+      </Stack>
+    </Box>
   );
 };
 
