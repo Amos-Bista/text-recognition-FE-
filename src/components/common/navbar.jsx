@@ -1,103 +1,155 @@
-import React, { useState } from "react";
-import { HiMenuAlt3, HiMenuAlt1 } from "react-icons/hi";
-import ResponsiveMenu, { Navlinks } from "./responsivemenu";
-import { useTheme } from "../../App"; // Correctly import the useTheme hook
-import { BiSolidMoon, BiSolidSun } from "react-icons/bi";
+// import React, { useState } from "react";
+// import ResponsiveMenu, { Navlinks } from "./responsivemenu";
+// import { useTheme } from "../../App";
+// import { BiSolidMoon, BiSolidSun } from "react-icons/bi";
+// import { AiFillHome } from "react-icons/ai";
+// import { FaUser } from "react-icons/fa";
+// import { MdDesignServices, MdSettings } from "react-icons/md";
+// import { TbFileReport } from "react-icons/tb";
+// import { Box, Stack, Typography, Collapse } from "@mui/material";
+// import { useNavigate } from "react-router-dom";
 
-const Navbar = () => {
-  const { theme, setTheme } = useTheme(); // Destructure theme and setTheme
+// export const SidebarData = [
+//   {
+//     title: "Dashboard",
+//     path: "/",
+//     icon: <AiFillHome size={20} />,
+//   },
+//   {
+//     title: "Upload",
+//     path: "/upload",
+//     icon: <FaUser size={19} />,
+//   },
+//   {
+//     title: "Chat",
+//     path: "/chat",
+//     icon: <MdDesignServices size={19} />,
+//     subItems: [
+//       { title: "General Chat", path: "/chat/general" },
+//       { title: "Project Chat", path: "/chat/project" },
+//     ],
+//   },
+//   {
+//     title: "SignIn",
+//     path: "/signin",
+//     icon: <TbFileReport size={20} />,
+//   },
+//   {
+//     title: "Settings",
+//     path: "/admin/setting",
+//     icon: <MdSettings size={20} />,
+//   },
+// ];
 
-  const [showMenu, setShowMenu] = useState(false);
+// const Navbar = () => {
+//   const { theme, setTheme } = useTheme();
+//   const [showMenu, setShowMenu] = useState(false);
+//   const [openIndex, setOpenIndex] = useState(null); // Track open index
+//   const navigate = useNavigate();
 
-  const toggleMenu = () => {
-    setShowMenu(!showMenu);
-  };
+//   const toggleMenu = () => setShowMenu(!showMenu);
 
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  };
+//   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
 
-  // Define theme-specific styles
-  const themeStyles = {
-    light: "text-white bg-[#6482AD]",
-    dark: "text-white bg-[#071952]",
-  };
+//   const handleToggle = (index) => {
+//     setOpenIndex(openIndex === index ? null : index);
+//   };
 
-  return (
-    <div
-      className={`relative z-10 flex justify-center w-full duration-300  ${themeStyles[theme]} px-8`}
-    >
-      <div className="container py-2 md:py-0 md:px-12 sm:px-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <a
-              href="/"
-              className="font-serif text-xl font-bold sm:text-xl md:text-3xl lg:text-4xl xl:text-5xl"
-            >
-              Text Detector
-            </a>
-          </div>
-          <nav className="hidden md:block">
-            <ul className="flex items-center gap-8">
-              {/* Nav links */}
-              {Navlinks.map(({ id, name, link }) => (
-                <li key={id} className="py-4">
-                  <a
-                    href={link}
-                    className="py-2 text-lg font-medium transition-colors duration-500 hover:text-primary hover:border-b-2 hover:border-primary"
-                  >
-                    {name}
-                  </a>
-                </li>
-              ))}
-              {/* DarkMode feature */}
-              {theme === "dark" ? (
-                <BiSolidSun
-                  onClick={toggleTheme}
-                  className="text-2xl cursor-pointer"
-                />
-              ) : (
-                <BiSolidMoon
-                  onClick={toggleTheme}
-                  className="text-2xl cursor-pointer"
-                />
-              )}
-            </ul>
-          </nav>
-          {/* Mobile view */}
-          <div className="flex items-center gap-4 md:hidden">
-            {/* Dark mode */}
-            {theme === "dark" ? (
-              <BiSolidSun
-                onClick={toggleTheme}
-                className="text-2xl cursor-pointer"
-              />
-            ) : (
-              <BiSolidMoon
-                onClick={toggleTheme}
-                className="text-2xl cursor-pointer"
-              />
-            )}
-            {/* Mobile Hamburger icon */}
-            {showMenu ? (
-              <HiMenuAlt1
-                onClick={toggleMenu}
-                className="transition-all cursor-pointer"
-                size={30}
-              />
-            ) : (
-              <HiMenuAlt3
-                onClick={toggleMenu}
-                className="transition-all cursor-pointer"
-                size={30}
-              />
-            )}
-          </div>
-        </div>
-      </div>
-      <ResponsiveMenu showMenu={showMenu} />
-    </div>
-  );
-};
+//   return (
+//     <Box
+//       sx={{
+//         width: "100%",
+//         paddingY: "1.6rem",
+//         paddingX: "1rem",
+//         color: "#B4B9BF",
+//         backgroundColor: "#1A1F1F",
+//         height: "100vh",
+//       }}
+//     >
+//       <Stack spacing={3}>
+//         <Box
+//           sx={{
+//             display: "flex",
+//             marginX: "auto",
+//             flexDirection: "column",
+//             alignItems: "center",
+//           }}
+//         >
+       
+//         </Box>
 
-export default Navbar;
+//         <Box sx={{ marginX: "auto" }}>
+//           {SidebarData.map((item, index) => (
+//             <Box key={index}>
+//               <Box
+//                 component="a"
+//                 onClick={(e) => {
+//                   e.preventDefault();
+//                   handleToggle(index);
+//                 }}
+//                 sx={{
+//                   paddingY: "0.6rem",
+//                   paddingLeft: "0.9rem",
+//                   width: "10.5rem",
+//                   borderRadius: "0.6rem",
+//                   display: "flex",
+//                   gap: "0.6rem",
+//                   color: "#B4B9BF",
+//                   alignItems: "center",
+//                   transition: "background-color 0.3s, color 0.3s",
+//                   "&:hover": {
+//                     backgroundColor: "#182637",
+//                     color: "skyblue",
+//                     transform: "scale(1.06)",
+//                   },
+//                   cursor: "pointer",
+//                 }}
+//               >
+//                 <Box
+//                   sx={{
+//                     padding: "0",
+//                     width: "22px",
+//                     height: "22px",
+//                     transition: "transform 0.3s",
+//                   }}
+//                 >
+//                   {item.icon}
+//                 </Box>
+//                 <Typography sx={{ fontSize: "14px", paddingTop: "1px" }}>
+//                   {item.title}
+//                 </Typography>
+//               </Box>
+
+//               {item.subItems && (
+//                 <Collapse in={openIndex === index} timeout="auto" unmountOnExit>
+//                   <Stack spacing={1} sx={{ paddingLeft: "2rem" }}>
+//                     {item.subItems.map((subItem, subIndex) => (
+//                       <Box
+//                         key={subIndex}
+//                         component="a"
+//                         href={subItem.path}
+//                         sx={{
+//                           display: "flex",
+//                           gap: "0.5rem",
+//                           color: "#B4B9BF",
+//                           textDecoration: "none",
+//                           "&:hover": {
+//                             color: "skyblue",
+//                           },
+//                         }}
+//                       >
+//                         <Typography>{subItem.title}</Typography>
+//                       </Box>
+//                     ))}
+//                   </Stack>
+//                 </Collapse>
+//               )}
+//             </Box>
+//           ))}
+//         </Box>
+//       </Stack>
+//     </Box>
+//   );
+// };
+
+// export default Navbar;
