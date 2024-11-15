@@ -68,7 +68,7 @@ const SignupForm = () => {
       .then((response) => {
         console.log(response);
         toast.success("Registration Successful");
-        navigate("/chat");
+        navigate("/signin");
       })
       .catch((error) => {
         console.error("Registration Error:", error);
