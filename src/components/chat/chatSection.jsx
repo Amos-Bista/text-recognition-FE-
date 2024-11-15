@@ -14,20 +14,21 @@ import * as docx from "docx";
 import { saveAs } from "file-saver"; // Import file-saver to save files
 import { RiImageCircleLine } from "react-icons/ri";
 import { TbSend } from "react-icons/tb";
-import { MdHideImage, MdOutlineAutoDelete } from "react-icons/md";
+import { MdOutlineAutoDelete } from "react-icons/md";
 
 const ChatSection = () => {
   const fileInputRef = useRef(null);
+  const [translatedText, setTranslatedText] = useState("");
+  const [sentText, setSentText] = useState("");
   const [sendImg, setSendImg] = useState(false);
   const [hideImg, setHideImg] = useState(true);
-  const [messages, setMessages] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]); // Changed to an array
   const [imagePreviews, setImagePreviews] = useState([]);
   const [convertedTexts, setConvertedTexts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [copiedText, setCopiedText] = useState([]);
   const [chatMessages, setChatMessages] = useState([]);
-
+  console.log("sent", sentText);
   React.useEffect(() => {
     const savedMessages = JSON.parse(localStorage.getItem(chatMessages)) || [];
     setChatMessages(savedMessages);
@@ -109,9 +110,6 @@ const ChatSection = () => {
     // Generate a unique ID for both messages
     const messageId = Date.now();
 
-    // Add the image message to the chat
-    // setChatMessages((prevMessages) => [...prevMessages, newImageMessage]);
-
     const formData = new FormData();
     selectedFiles.forEach((file) => {
       formData.append("file", file);
@@ -130,10 +128,17 @@ const ChatSection = () => {
         return axios.get("http://localhost:5000/api/converted-texts");
       })
       .then((response) => {
+        console.log("response", response);
         const newConvertedTexts = response.data.texts; // Extract texts from the response
+        setConvertedTexts((prev) => response.data.texts);
+        console.log("response", response.data.texts);
+        setLoading(false);
+        toast.success("Conversion successful!");
 
-        setConvertedTexts((prev) => [...prev, ...response.data.texts]);
-
+        return newConvertedTexts;
+      })
+      .then((newConvertedTexts) => {
+        console.log("than", newConvertedTexts);
         const newMessage = {
           id: messageId,
           type: "both", // Indicates that the message contains both image and text
@@ -146,17 +151,11 @@ const ChatSection = () => {
             timestamp: new Date().toISOString(),
           },
         };
-        console.log("text inside submit", convertedTexts);
         setHideImg(false);
-
-        // Add the text message to the chat (same ID as the image message)
         setChatMessages((prevMessages) => [
           ...prevMessages.filter((msg) => msg.id !== messageId), // Remove previous message with the same ID if any
           newMessage, // Ensure to keep the image message in chat
         ]);
-
-        setLoading(false);
-        toast.success("Conversion successful!");
       })
       .catch((error) => {
         setLoading(false);
@@ -168,10 +167,62 @@ const ChatSection = () => {
         );
       });
   };
-  console.log("image", hideImg);
 
-  console.log("chat", chatMessages);
+  const handleCopy = (index) => {
+    if (!Array.isArray(convertedTexts) || !convertedTexts[index]) {
+      // if (!convertedTexts) {
+      console.error("Invalid text or index");
+      toast.error("No text to copy");
+      return;
+    }
 
+    navigator.clipboard
+      .writeText(convertedTexts[index])
+      .then(() => {
+        setCopiedText(convertedTexts[index]); // Update state with copied text
+        toast.success("Text Copied To Clipboard"); // Show success toast
+      })
+      .catch((error) => {
+        toast.error("Failed to copy text. Please try again."); // Show error toast
+        console.error("Copy failed:", error);
+      });
+  };
+
+  const handleTranslateText = async (srcLang = "en", destLang = "ne") => {
+    try {
+      // if (!copiedText || typeof copiedText !== "string") {
+      //   console.error("Invalid text to translate");
+      //   toast.error("Please provide valid text to translate.");
+      //   return;
+      // }
+
+      const payload = {
+        text: sentText,
+        // src_lang: srcLang,
+        // dest_lang: destLang,
+      };
+
+      const response = await axios.post(
+        "http://localhost:5000/translate",
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      // console.log("Translated text:", response.data.translated_text);
+      // console.log("Translated text:", response.data);
+      setTranslatedText(response.data.translated_text);
+
+      toast.success("Translation successful!");
+    } catch (error) {
+      console.error("Error during translation:", error);
+      toast.error("Translation failed. Please try again.");
+    }
+  };
+  console.log("Translated text:", translatedText);
   const handleDownloadWord = () => {
     if (convertedTexts.length === 0) {
       toast.error("No converted texts available for download.");
@@ -207,41 +258,7 @@ const ChatSection = () => {
       });
   };
 
-  // const handleDownload = () => {
-  //   // Trigger download without interacting with a `toggle` function.
-  //   fetch(fileUrl)
-  //     .then((response) => response.blob())
-  //     .then((blob) => {
-  //       const url = window.URL.createObjectURL(blob);
-  //       const a = document.createElement("a");
-  //       a.href = url;
-  //       a.download = "file.docx";
-  //       document.body.appendChild(a);
-  //       a.click();
-  //       a.remove();
-  //     })
-  //     .catch((error) => console.error("Download error:", error));
-  // };
-
-  const handleCopy = (index) => {
-    if (!convertedTexts || !convertedTexts[index]) {
-      console.error("Invalid text or index");
-      toast.error("No text to copy");
-      return;
-    }
-
-    navigator.clipboard
-      .writeText(convertedTexts[index])
-      .then(() => {
-        setCopiedText(convertedTexts[index]); // Update state with copied text
-        toast.success("Text Copied To Clipboard"); // Show success toast
-      })
-      .catch((error) => {
-        toast.error("Failed to copy text. Please try again."); // Show error toast
-        console.error("Copy failed:", error);
-      });
-  };
-
+  // console.log("Copied", copiedText);
   return (
     <Box
       sx={{
@@ -368,8 +385,6 @@ const ChatSection = () => {
                         }}
                       >
                         <Typography variant="body2">Converted Text</Typography>
-                        <Button onClick={handleDownloadWord}>Download</Button>
-                        <Button onClick={() => handleCopy(index)}>Copy</Button>
                       </Box>
                       {/* Display Converted Text */}
                       <Typography
@@ -382,6 +397,18 @@ const ChatSection = () => {
                       >
                         {message.text.content.join("\n")}
                       </Typography>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <Button onClick={() => handleCopy(index)}>Copy</Button>
+                        <Button onClick={handleDownloadWord}>Download</Button>
+                        <Button onClick={handleTranslateText}>
+                          Translate tp Nepali
+                        </Button>
+                      </Box>
                     </Box>
                   </Box>
                 )}
@@ -389,7 +416,7 @@ const ChatSection = () => {
             ))}
         </List>
       </Box>
-      {/* <Typography
+      <Typography
         variant="body2"
         mutiline="true"
         sx={{
@@ -397,8 +424,8 @@ const ChatSection = () => {
           color: "white",
         }}
       >
-        {convertedTexts}
-      </Typography> */}
+        {translatedText}
+      </Typography>
 
       <Box
         sx={{
@@ -499,9 +526,9 @@ const ChatSection = () => {
           <TextField
             variant="outlined"
             fullWidth
-            // value={convertedTexts}
+            value={sentText}
             placeholder="Type a message..."
-            onChange={(e) => setMessages((prev) => [...prev, e.target.value])}
+            onChange={(e) => setSentText(e.target.value)}
             // onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
             InputProps={{
               sx: {
@@ -521,7 +548,7 @@ const ChatSection = () => {
           `}</style>
           <TbSend color="white" size={52} onClick={handleConvertFilesClick} />
           <MdOutlineAutoDelete
-            onClick={handleClearImages}
+            onClick={handleTranslateText}
             color="white"
             size={52}
           />

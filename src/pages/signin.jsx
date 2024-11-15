@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 // import { useTheme } from "../../App"; // Import the useTheme hook
 
-const SignInForm = () => {
+const SignInForm = ({ handleLogin }) => {
   const [username, setusername] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -23,7 +23,7 @@ const SignInForm = () => {
         localStorage.setItem("authToken", response.data.token);
 
         toast.success("Login successful");
-
+        // handleLogin();
         // Navigate to the chat page
         navigate("/chat");
       })
@@ -69,7 +69,7 @@ const SignInForm = () => {
         justifyContent: "center",
         width: "90rem",
         alignItems: "center",
-        backgroundColor: "red",
+        // backgroundColor: "black",
         backgroundImage: 'url("/signin.jpeg")', // Use the image as the background in dark mode
         backgroundSize: "screen", // Ensure the background covers the entire area
         backgroundPosition: "center", // Center the background image
@@ -77,7 +77,8 @@ const SignInForm = () => {
     >
       <Box
         sx={{
-          width: "40rem",
+          // width: "100vw",
+          paddingX: "30rem",
           height: "30rem",
           backgroundColor: "rgba(55, 65, 81, 0.9)", // Semi-transparent background in dark mode, solid in light mode
           padding: { xs: "1.5rem", sm: "2rem", md: "2.5rem" }, // Adjust padding for different screen sizes
