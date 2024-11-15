@@ -13,22 +13,27 @@ import ChatSection from "./components/chat/chatSection";
 
 function App() {
   return (
-    <Box sx={{ height: "100vh", width: "100vw" }}>
+    <Box sx={{ height: "100vh", width: "100vw", overflowX : "hidden" }}>
       <Router>
-        <div className={`flex items-center  align-middle w-[100vh] }`}>
-          <SuperNavbar className="w-[5vw]" />
+        <div className={`flex  w-[100vh] }`}>
           <Box
-            className="w-[95vw]
-        "
+            sx={{
+              transition: "width 0.3s ease",
+              // backgroundColor: "#1A1F1F",
+              // height: "100vh",
+            }}
           >
-            <Routes>
-              <Route path="/" element={<About />} />
-              <Route path="/upload" element={<UploadPages />} />
-              <Route path="/signin" element={<SignInForm />} />
-              <Route path="/chat" element={<ChatSection />} />
-              <Route path="/signup" element={<SignupForm />} />
-            </Routes>
+            <SuperNavbar />
           </Box>
+          {/* <Box className="w-[95vw]"> */}
+          <Routes>
+            <Route path="/" element={<About />} />
+            <Route path="/upload" element={<UploadPages />} />
+            <Route path="/signin" element={<SignInForm />} />
+            <Route path="/chat" element={<ChatSection />} />
+            <Route path="/signup" element={<SignupForm />} />
+          </Routes>
+          {/* </Box> */}
         </div>
         <ToastContainer />
       </Router>

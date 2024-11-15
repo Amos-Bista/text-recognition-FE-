@@ -9,6 +9,7 @@ import * as docx from "docx";
 import { saveAs } from "file-saver"; // Import file-saver to save files
 
 const UploadForm = () => {
+  const [toggle, setToggle] = useState();
   const [selectedFiles, setSelectedFiles] = useState([]); // Initialize as an array
   const [loading, setLoading] = useState(false); // Loading state
   const [convertedTexts, setConvertedTexts] = useState([]); // Store converted texts
@@ -81,28 +82,32 @@ const UploadForm = () => {
   };
 
   const handleDownloadWord = () => {
-    if (convertedTexts.length === 0) {
-      toast.error("No converted texts available for download.");
-      return;
+    try {
+      if (convertedTexts.length === 0) {
+        toast.error("No converted texts available for download.");
+        return;
+      }
+
+      const doc = new docx.Document({
+        sections: [
+          {
+            properties: {},
+            children: convertedTexts.map(
+              (textObj) =>
+                new docx.Paragraph({
+                  children: [new docx.TextRun(textObj || "No text available")],
+                })
+            ),
+          },
+        ],
+      });
+      setToggle("");
+      docx.Packer.toBlob(doc).then((blob) => {
+        saveAs(blob, "converted-texts.docx");
+      });
+    } catch (error) {
+      console.error("Error in handleDownloadWord:", error);
     }
-
-    const doc = new docx.Document({
-      sections: [
-        {
-          properties: {},
-          children: convertedTexts.map(
-            (textObj) =>
-              new docx.Paragraph({
-                children: [new docx.TextRun(textObj || "No text available")],
-              })
-          ),
-        },
-      ],
-    });
-
-    docx.Packer.toBlob(doc).then((blob) => {
-      saveAs(blob, "converted-texts.docx");
-    });
   };
 
   const handleViewTextClick = () => {

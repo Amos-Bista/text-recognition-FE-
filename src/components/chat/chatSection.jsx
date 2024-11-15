@@ -14,29 +14,30 @@ import * as docx from "docx";
 import { saveAs } from "file-saver"; // Import file-saver to save files
 import { RiImageCircleLine } from "react-icons/ri";
 import { TbSend } from "react-icons/tb";
-import { MdOutlineAutoDelete } from "react-icons/md";
+import { MdHideImage, MdOutlineAutoDelete } from "react-icons/md";
 
 const ChatSection = () => {
   const fileInputRef = useRef(null);
-
+  const [sendImg, setSendImg] = useState(false);
+  const [hideImg, setHideImg] = useState(true);
   const [messages, setMessages] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]); // Changed to an array
   const [imagePreviews, setImagePreviews] = useState([]);
   const [convertedTexts, setConvertedTexts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [copiedText, setCopiedText] = useState([]);
+  const [chatMessages, setChatMessages] = useState([]);
 
-  const handleSendMessage = () => {
-    if (selectedFiles.length > 0) {
-      setMessages((prev) => [...prev, "Sent image files"]);
-    }
-  };
-  // const upload = (event) => {
-  //   // document.getElementById("fileInput").click();
-  //   // handleImageUpload();
-  //   // setConvertedTexts([]);
-  //   handleConvertFilesClick();
-  // };
+  React.useEffect(() => {
+    const savedMessages = JSON.parse(localStorage.getItem(chatMessages)) || [];
+    setChatMessages(savedMessages);
+    console.log("chat message", chatMessages);
+  }, []);
+
+  // Save messages to local storage whenever chatMessages changes
+  React.useEffect(() => {
+    localStorage.setItem("chatMessages", JSON.stringify(chatMessages));
+  }, [chatMessages]);
 
   const handleOpenFileDialog = () => {
     if (fileInputRef.current) {
@@ -53,6 +54,8 @@ const ChatSection = () => {
 
     // Update state for selected files
     setSelectedFiles(files);
+    console.log("selectedFiles", selectedFiles);
+    setHideImg(true);
 
     // Generate image previews using URL.createObjectURL
     const newPreviews = files.map((file) => URL.createObjectURL(file));
@@ -64,55 +67,18 @@ const ChatSection = () => {
       imagePreviews.forEach((previewUrl) => URL.revokeObjectURL(previewUrl));
     };
   }, [imagePreviews]);
-  // const handleImageSelection = (event) => {
-  //   setSelectedFiles(event.target.files);
-  // };
-
-  // if (imageFiles.length > 0) {
-  //   const newPreviews = imageFiles.map((file) => URL.createObjectURL(file)); // Create image previews
-  //   setImagePreviews((prev) => [...prev, ...newPreviews]);
-  // } else {
-  //   toast.error("error");
-  //   console.log("error");
-  // }`
 
   const handleClearImages = () => {
-    document.getElementById("fileInput").click();
-
+    const fileInput = document.getElementById("fileInput");
+    if (fileInput) {
+      fileInput.click();
+    } else {
+      console.warn("File input element not found.");
+    }
     handleClearConvertedTexts();
     setImagePreviews([]);
     setSelectedFiles([]); // Clear selected files as well
   };
-
-  // const themeStyles = {
-  //     backgroundColor: "linear-gradient(135deg, #ffffff, #6482AD)",
-  //     color: "#000",
-  //   dark: {
-  //     backgroundColor: "linear-gradient(135deg, #3B4D87, #6482AD)",
-  //     color: "#fff",
-  //   },
-  // };
-
-  // const themeStyles1 = {
-  //   light: {
-  //     backgroundColor: "linear-gradient(135deg, #5982AD, #6482AD)",
-  //     color: "#000",
-  //   },
-  //   dark: {
-  //     backgroundColor: "linear-gradient(135deg, #1F3045, #2B3C52)",
-  //     color: "#fff",
-  //   },
-  // };
-  // const themeStyles2 = {
-  //   light: {
-  //     backgroundColor: "linear-gradient(135deg, #ffffff, #6482AD)",
-  //     color: "#000",
-  //   },
-  //   dark: {
-  //     backgroundColor: "linear-gradient(135deg, #3B4D87, #6482AD)",
-  //     color: "#fff",
-  //   },
-  // };
 
   const handleClearConvertedTexts = () => {
     axios
@@ -136,34 +102,65 @@ const ChatSection = () => {
       return;
     }
 
-    // setConvertedTexts([]); // Clear previous texts
-    setLoading(true); // Start loading
+    setConvertedTexts([]); // Clear previous texts
+    setLoading(true);
+    setSendImg(true);
+
+    // Generate a unique ID for both messages
+    const messageId = Date.now();
+
+    // Add the image message to the chat
+    // setChatMessages((prevMessages) => [...prevMessages, newImageMessage]);
 
     const formData = new FormData();
     selectedFiles.forEach((file) => {
-      formData.append("file", file); // Append each selected file as 'file'
+      formData.append("file", file);
     });
 
-    // const payload = {
-    //   files: selectedFiles,
-    // };
     axios
-      .post("http://localhost:5000/api/convert-image", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+      .delete("http://localhost:5000/api/clear-texts")
+      .then(() => {
+        return axios.post("http://localhost:5000/api/convert-image", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
       })
       .then(() => {
         return axios.get("http://localhost:5000/api/converted-texts");
       })
       .then((response) => {
+        const newConvertedTexts = response.data.texts; // Extract texts from the response
+
         setConvertedTexts((prev) => [...prev, ...response.data.texts]);
-        // setImagePreviews([]);
+
+        const newMessage = {
+          id: messageId,
+          type: "both", // Indicates that the message contains both image and text
+          image: {
+            content: selectedFiles,
+            timestamp: new Date().toISOString(),
+          },
+          text: {
+            content: newConvertedTexts, // Placeholder for the text content
+            timestamp: new Date().toISOString(),
+          },
+        };
+        console.log("text inside submit", convertedTexts);
+        setHideImg(false);
+
+        // Add the text message to the chat (same ID as the image message)
+        setChatMessages((prevMessages) => [
+          ...prevMessages.filter((msg) => msg.id !== messageId), // Remove previous message with the same ID if any
+          newMessage, // Ensure to keep the image message in chat
+        ]);
+
         setLoading(false);
         toast.success("Conversion successful!");
       })
       .catch((error) => {
         setLoading(false);
+        setSendImg(false);
         toast.error("Conversion failed. Please try again.");
         console.error(
           "Conversion failed:",
@@ -171,6 +168,9 @@ const ChatSection = () => {
         );
       });
   };
+  console.log("image", hideImg);
+
+  console.log("chat", chatMessages);
 
   const handleDownloadWord = () => {
     if (convertedTexts.length === 0) {
@@ -182,28 +182,54 @@ const ChatSection = () => {
       sections: [
         {
           properties: {},
-          children: convertedTexts.flatMap((textObj) => {
-            // Split the text into paragraphs and create a TextRun for each
-            return textObj
-              .split("\n") // Split text into lines based on newline characters
-              .filter((line) => line.trim() !== "") // Ignore empty lines
-              .map(
-                (line) =>
-                  new docx.Paragraph({
-                    children: [new docx.TextRun(line || "No text available")],
-                    alignment: docx.AlignmentType.LEFT, // Set the alignment here
-                  })
-              );
+          children: convertedTexts.map((textObj) => {
+            return new docx.Paragraph({
+              children: [
+                new docx.TextRun({
+                  text: textObj || "No text available",
+                  break: 1, // Adding a line break between each converted text entry
+                }),
+              ],
+              alignment: docx.AlignmentType.LEFT,
+            });
           }),
         },
       ],
     });
 
-    docx.Packer.toBlob(doc).then((blob) => {
-      saveAs(blob, "converted_texts.docx");
-    });
+    docx.Packer.toBlob(doc)
+      .then((blob) => {
+        saveAs(blob, "converted_texts.docx");
+      })
+      .catch((error) => {
+        toast.error("Failed to create Word document. Please try again.");
+        console.error("Word document generation error:", error);
+      });
   };
+
+  // const handleDownload = () => {
+  //   // Trigger download without interacting with a `toggle` function.
+  //   fetch(fileUrl)
+  //     .then((response) => response.blob())
+  //     .then((blob) => {
+  //       const url = window.URL.createObjectURL(blob);
+  //       const a = document.createElement("a");
+  //       a.href = url;
+  //       a.download = "file.docx";
+  //       document.body.appendChild(a);
+  //       a.click();
+  //       a.remove();
+  //     })
+  //     .catch((error) => console.error("Download error:", error));
+  // };
+
   const handleCopy = (index) => {
+    if (!convertedTexts || !convertedTexts[index]) {
+      console.error("Invalid text or index");
+      toast.error("No text to copy");
+      return;
+    }
+
     navigator.clipboard
       .writeText(convertedTexts[index])
       .then(() => {
@@ -211,7 +237,7 @@ const ChatSection = () => {
         toast.success("Text Copied To Clipboard"); // Show success toast
       })
       .catch((error) => {
-        toast.success("Text Copied To Clipboard"); // Show success toast
+        toast.error("Failed to copy text. Please try again."); // Show error toast
         console.error("Copy failed:", error);
       });
   };
@@ -219,12 +245,12 @@ const ChatSection = () => {
   return (
     <Box
       sx={{
-        height: "100%",
-        width: "100vw",
+        height: "100vh",
+        width: "screen",
         display: "flex",
         flexDirection: "column",
         borderLeft: "1px solid #e0e0e0",
-        background: "#1A1F1F",
+        background: "#3B4545",
         // color: themeStyles[theme].color,
       }}
     >
@@ -233,83 +259,77 @@ const ChatSection = () => {
           flex: 1,
           mb: 2,
           padding: 2,
-          // background: "black",
-          // color: themeStyles[theme].color,
-          width: "100%",
           overflowY: "auto", // Ensures overflow is handled within the Paper
         }}
       >
         <List
           sx={{
             overflowY: "auto", // Enables scrolling for the list content
-            maxHeight: "34rem", // Ensures the List height is restricted to the Paper's height
+            maxHeight: "34rem", // Restricts list height
+            display: "flex",
+            flexDirection: "column-reverse", // Ensures new messages appear at the bottom
           }}
         >
-          {imagePreviews.map((src, index) => (
-            <ListItem
-              key={`image-${index}`}
+          {/* Display welcome message if no messages exist */}
+          {chatMessages.length === 0 && (
+            <Box
               sx={{
                 display: "flex",
-                flexDirection: "column",
-                borderBottom: "1px solid black",
-                paddingBottom: "4rem",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "white",
+                fontSize: "2rem",
               }}
             >
-              <Box
+              <h1>Welcome</h1>
+            </Box>
+          )}
+
+          {/* Map through chatMessage to display text and images */}
+          {chatMessages
+            .slice(0)
+            .reverse()
+            .map((message, index) => (
+              <ListItem
+                key={message.id || `message-${index}`}
                 sx={{
-                  width: "100%",
                   display: "flex",
                   flexDirection: "column",
-                  justifyContent: "right",
-                  padding: "2rem",
+                  borderBottom: "1px solid black",
+                  paddingBottom: "4rem",
+                  mb: 2,
                 }}
               >
-                <Box
-                  sx={{
-                    width: "100%",
-                    display: "flex",
-                    justifyContent: "right",
-                  }}
-                >
+                {/* Display image if available */}
+                {message.image.content?.length > 0 && (
                   <Box
                     sx={{
-                      height: "4rem",
-                      width: "10rem",
                       display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      borderRadius: "12rem",
-                      // background: themeStyles1.backgroundColor,
-                      // color: themeStyles.color,
-                      backgroundColor: "#1A1F1F",
-                      color: "white",
+                      flexDirection: "column",
+                      alignItems: "flex-end",
+                      gap: 1,
                     }}
                   >
-                    <Typography variant="body2">Your Image</Typography>
-                  </Box>
-                </Box>
-                <Box
-                  sx={{
-                    width: "100%",
-                    display: "flex",
-                    justifyContent: "right",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      paddingX: "1.5rem",
-                      color: "white",
+                    <Box
+                      sx={{
+                        width: "auto",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        borderRadius: "12rem",
+                        backgroundColor: "#1A1F1F",
+                        color: "white",
+                        padding: "0.5rem 1rem",
+                        mb: 1,
+                      }}
+                    >
+                      <Typography variant="body2">Your Image</Typography>
+                    </Box>
 
-                      // background: themeStyles1.backgroundColor,
-                      // color: themeStyles.color,
-                      borderRadius: "2rem",
-                      display: "flex",
-                      justifyContent: "center",
-                    }}
-                  >
+                    {/* Display Image */}
                     <Avatar
                       variant="rounded"
-                      src={src}
+                      src={URL.createObjectURL(message.image.content[0])}
                       alt={`Uploaded image ${index + 1}`}
                       sx={{
                         width: "100%",
@@ -319,103 +339,75 @@ const ChatSection = () => {
                         "@media (max-width: 600px)": {
                           width: "90%",
                         },
+                        borderRadius: 2,
                       }}
                     />
                   </Box>
-                </Box>
-              </Box>
-              {convertedTexts && convertedTexts.lenght > 0 && (
-                <Box sx={{ width: "100%" }}>
+                )}
+
+                {/* Display text if available */}
+                {message.text.content?.length > 0 && (
                   <Box
-                    sx={{
-                      width: "72rem",
-                      paddingTop: "0",
-                      overflow: "hidden",
-                      borderRadius: "1rem",
-                      // background: themeStyles1.backgroundColor,
-                      // color: themeStyles1.color,
-                      // color: "white",
-                    }}
+                    sx={{ width: "50rem", mt: 2 }}
+                    // key={message.id || `message-${index}`}
                   >
                     <Box
                       sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        paddingX: "2rem",
-                        justifyContent: "space-between",
-                        // background: themeStyles2.backgroundColor,
-                        // color: themeStyles1.color,
+                        height: "auto",
+                        backgroundColor: "#1A1F1F",
                         color: "white",
+                        borderRadius: 2,
+                        padding: "1rem",
                       }}
                     >
-                      <Box>
-                        <Typography sx={{ color: "" }}>
-                          Converted Text
-                        </Typography>
-                      </Box>
-                      <Box>
-                        {convertedTexts.length > 0 && (
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "start",
-                              gap: "2rem",
-                            }}
-                          >
-                            <Button
-                              color="primary"
-                              fullWidth
-                              onClick={handleDownloadWord}
-                              disabled={loading}
-                            >
-                              Download Word
-                            </Button>
-                            <Button
-                              color="secondary"
-                              onClick={() => handleCopy(index)}
-                            >
-                              Copy
-                            </Button>
-                          </Box>
-                        )}
-                      </Box>
-                    </Box>
-                    {convertedTexts[index] && (
                       <Box
                         sx={{
-                          paddingX: "2rem",
-                          paddingY: "2rem",
-                          backgroundColor: "white",
-                          // background: themeStyles1.backgroundColor,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
                         }}
                       >
-                        <Typography
-                          variant="body2"
-                          mutiline="true"
-                          sx={{
-                            marginTop: 1,
-                            // color: themeStyles2.color,
-                            color: "white",
-                          }}
-                        >
-                          {convertedTexts[index]
-                            .split("\n")
-                            .filter((line) => line.trim() !== "")
-                            .map((line, idx) => (
-                              <p key={idx}>{line}</p>
-                            ))}
-                        </Typography>
+                        <Typography variant="body2">Converted Text</Typography>
+                        <Button onClick={handleDownloadWord}>Download</Button>
+                        <Button onClick={() => handleCopy(index)}>Copy</Button>
                       </Box>
-                    )}
+                      {/* Display Converted Text */}
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          marginTop: 1,
+                          color: "white",
+                          whiteSpace: "pre-wrap", // Preserves line breaks
+                        }}
+                      >
+                        {message.text.content.join("\n")}
+                      </Typography>
+                    </Box>
                   </Box>
-                </Box>
-              )}
-            </ListItem>
-          ))}
+                )}
+              </ListItem>
+            ))}
         </List>
       </Box>
+      {/* <Typography
+        variant="body2"
+        mutiline="true"
+        sx={{
+          marginTop: 1,
+          color: "white",
+        }}
+      >
+        {convertedTexts}
+      </Typography> */}
 
-      <Box sx={{ display: "flex", justifyContent: "center", paddingY: "2rem" }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          // paddingY: "2rem",
+          width: "100vw",
+        }}
+      >
         {/* <div>
           {imagePreviews?.map((preview, index) => (
             <img key={index} src={preview} alt={`Preview ${index}`} />
@@ -430,7 +422,6 @@ const ChatSection = () => {
             paddingX: "2rem",
             borderRadius: "4rem",
             border: "1px solid #071952 ",
-            width: "50rem",
             alignItems: "center",
             backgroundColor: "#1A1F1F",
             boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.5)",
@@ -486,27 +477,29 @@ const ChatSection = () => {
               {/* Display selected images */}
             </Box>
           </>
-          <Box
-            mt={2}
-            display="flex"
-            gap={2}
-            flexWrap="wrap"
-            // sx={{ position: "absolute" }}
-          >
-            {imagePreviews.map((src, index) => (
-              <Avatar
-                key={index}
-                src={src}
-                alt={`Selected image ${index}`}
-                variant="rounded"
-                sx={{ width: 100, height: 100 }}
-              />
-            ))}
-          </Box>
+          {hideImg && (
+            <Box
+              mt={2}
+              display="flex"
+              gap={2}
+              flexWrap="wrap"
+              // sx={{ position: "absolute" }}
+            >
+              {imagePreviews.map((src, index) => (
+                <Avatar
+                  key={index}
+                  src={src}
+                  alt={`Selected image ${index}`}
+                  variant="rounded"
+                  sx={{ width: 100, height: 100 }}
+                />
+              ))}
+            </Box>
+          )}
           <TextField
             variant="outlined"
             fullWidth
-            value={convertedTexts}
+            // value={convertedTexts}
             placeholder="Type a message..."
             onChange={(e) => setMessages((prev) => [...prev, e.target.value])}
             // onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
@@ -521,13 +514,11 @@ const ChatSection = () => {
             }}
             className="remove-border"
           />
-
           <style jsx>{`
             .remove-border .MuiOutlinedInput-notchedOutline {
               border: none; // Removes the border
             }
           `}</style>
-
           <TbSend color="white" size={52} onClick={handleConvertFilesClick} />
           <MdOutlineAutoDelete
             onClick={handleClearImages}
