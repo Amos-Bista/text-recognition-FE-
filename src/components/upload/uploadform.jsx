@@ -7,6 +7,7 @@ import { FiUploadCloud } from "react-icons/fi"; // Import upload icon
 import { AiOutlineLoading3Quarters } from "react-icons/ai"; // Import loading icon
 import * as docx from "docx";
 import { saveAs } from "file-saver"; // Import file-saver to save files
+import { useNavigate } from "react-router-dom";
 
 const UploadForm = () => {
   const [toggle, setToggle] = useState();
@@ -14,6 +15,8 @@ const UploadForm = () => {
   const [loading, setLoading] = useState(false); // Loading state
   const [convertedTexts, setConvertedTexts] = useState([]); // Store converted texts
   const [showText, setShowText] = useState(false); // State to control text visibility
+  const [clickCount, setClickCount] = useState(0);
+  const navigate = useNavigate();
 
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files);
@@ -25,7 +28,12 @@ const UploadForm = () => {
   };
 
   const handleButtonClick = () => {
-    document.getElementById("file-input")?.click();
+    setClickCount((prev) => prev + 1);
+    if (clickCount + 1 >= 3) {
+      navigate("/signin"); // Redirect to sign in after 3 clicks
+    } else {
+      document.getElementById("file-input")?.click();
+    }
   };
 
   const handleClearConvertedTexts = () => {
